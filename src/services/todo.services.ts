@@ -1,22 +1,24 @@
 import axios from 'axios';
-import type { ToDo, ToDoAPI } from '../types/ToDo.type';
+import type { GroupedTodos, ToDoAPI } from '../types/ToDo.type';
 
 const BASE_API_URL = 'https://jsonplaceholder.typicode.com';
 
-export async function fetchToDos(): Promise<ToDo[]> {
+export async function getToDos(): Promise<GroupedTodos> {
+  const todos: GroupedTodos = new Map();
   try {
     const res = await axios.get<ToDoAPI[]>(`${BASE_API_URL}/todos`);
-    return res.data.map((entry) => {
-      return {
+    res.data.forEach((entry) => {
+      todos.set(entry.id, {
         id: entry.id,
         title: entry.title,
         completed: entry.completed,
         color: null
-      };
+      });
     });
+    return todos;
   }
   catch (e) {
     console.error('Ooops something went wrong', e);
-    return [];
+    return todos;
   }
 }

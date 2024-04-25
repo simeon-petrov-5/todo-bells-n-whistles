@@ -1,5 +1,30 @@
 <script setup lang="ts">
+import { storeToRefs } from 'pinia';
 import InlineBtn from './components/InlineBtn.vue';
+import ToDoItem from './components/ToDoItem.vue';
+import { useTodosStore } from './store/useTodosStore.ts';
+import type { ToDo } from './types/ToDo.type';
+
+const store = useTodosStore();
+const { allTodos, isFetchingTodos } = storeToRefs(store);
+
+store.fetchTodos();
+
+const statusFilter = ref<null | boolean>(null);
+
+const todos = computed(() => {
+  if (statusFilter.value === null) {
+    return allTodos.value;
+  }
+
+  const filtered = new Map<number, ToDo>();
+  allTodos.value.forEach((item) => {
+    if (item.completed === statusFilter.value) {
+      filtered.set(item.id, item);
+    }
+  });
+  return filtered;
+});
 </script>
 
 <template>
@@ -17,17 +42,17 @@ import InlineBtn from './components/InlineBtn.vue';
             </InlineBtn>
           </li>
           <li class="list-reset">
-            <InlineBtn class="secondary outline">
+            <InlineBtn class="secondary outline" @click="store.markAll('resolved')">
               ✅ Mark all as resolved
             </InlineBtn>
           </li>
           <li class="list-reset">
-            <InlineBtn class="secondary outline">
+            <InlineBtn class="secondary outline" @click="store.markAll('unresolved')">
               ❎ Mark all as unresolved
             </InlineBtn>
           </li>
           <li class="list-reset">
-            <InlineBtn class="secondary outline">
+            <InlineBtn class="secondary outline" @click="store.deleteAll">
               🗑️ Delete all todos
             </InlineBtn>
           </li>
@@ -35,29 +60,26 @@ import InlineBtn from './components/InlineBtn.vue';
       </aside>
 
       <div>
-        <ul class="list-reset">
-          <li class="list-reset">
-            <article class="flex items-center gap-3">
-              <label for="checkbox-1" class="grow-1">
-                <input
-                  id="checkbox-1"
-                  type="checkbox"
-                  name="checkbox-1"
-                >
-                <span class="!cursor-pointer !border-none" data-tooltip="Title">Title</span>
+        <div class="flex flex-wrap items-center gap-3">
+          <span>Filters</span>
+          <button :class="[statusFilter === true ? '' : 'outline']" @click="statusFilter = true">
+            Show all resolved
+          </button>
+          <button :class="[statusFilter === false ? '' : 'outline']" @click="statusFilter = false">
+            Show all resolved
+          </button>
+          <button class="secondary" :class="[statusFilter !== null ? '' : 'outline']" @click="statusFilter = null">
+            Clear filters
+          </button>
+        </div>
+        <div v-if="isFetchingTodos">
+          <em class="mb-3 block text-center">Loading your favourite todos, please be patient</em>
+          <progress />
+        </div>
 
-              </label>
-              <InlineBtn data-tooltip="Resolve">
-                ✅
-              </InlineBtn>
-
-              <InlineBtn data-tooltip="Unresolve">
-                ❎
-              </InlineBtn>
-              <InlineBtn data-tooltip="Delete">
-                🗑️
-              </InlineBtn>
-            </article>
+        <ul v-else class="list-reset">
+          <li v-for="[id, item] in todos" :key="id" class="list-reset">
+            <ToDoItem v-bind="item" />
           </li>
         </ul>
       </div>
