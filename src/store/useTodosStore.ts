@@ -1,9 +1,9 @@
 import { defineStore } from 'pinia';
-import type { GroupedTodos } from '../types/ToDo.type';
+import type { ToDo } from '../types/ToDo.type';
 import { getToDos } from '../services/todo.services';
 
 export const useTodosStore = defineStore('todos', () => {
-  const allTodos = ref<GroupedTodos>(new Map());
+  const allTodos = ref<ToDo[]>([]);
   const isFetchingTodos = ref(true);
 
   const fetchTodos = async () => {
@@ -17,19 +17,37 @@ export const useTodosStore = defineStore('todos', () => {
     allTodos.value.forEach(item => item.completed = mode === 'resolved');
   };
   const deleteAll = () => {
-    allTodos.value.clear();
+    allTodos.value = [];
   };
 
-  const updateSingleStatus = (id: number, completed: boolean) => {
-    const item = allTodos.value.get(id);
+  const updateSingleStatus = (idx: number, completed: boolean) => {
+    const item = allTodos.value[idx];
     if (item) {
       item.completed = completed;
     }
   };
 
-  const deleteSingle = (id: number) => {
-    allTodos.value.delete(id);
+  const deleteSingle = (idx: number) => {
+    allTodos.value.splice(idx, 1);
   };
 
-  return { allTodos, isFetchingTodos, fetchTodos, markAll, deleteAll, updateSingleStatus, deleteSingle };
+  const createNew = (title: string) => {
+    // This is not optimal for performance, but either way id generation should be handled by the BE & DB and not in FE
+    let lastId = 0;
+    allTodos.value.forEach((todo) => {
+      if (todo.id > lastId) {
+        lastId = todo.id;
+      }
+    });
+    const id = lastId + 1;
+    const newItem: ToDo = {
+      id,
+      title,
+      completed: false,
+      color: null
+    };
+    allTodos.value.unshift(newItem);
+  };
+
+  return { allTodos, isFetchingTodos, fetchTodos, markAll, deleteAll, updateSingleStatus, deleteSingle, createNew };
 });

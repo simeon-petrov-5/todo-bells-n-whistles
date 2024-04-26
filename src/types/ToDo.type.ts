@@ -8,5 +8,3 @@ export type ToDoAPI = {
 export type ToDo = Omit<ToDoAPI, 'userId'> & {
   color: string | null
 };
-
-export type GroupedTodos = Map<ToDo['id'], ToDo>;
