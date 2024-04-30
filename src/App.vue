@@ -4,6 +4,7 @@ import Sidebar from './components/Sidebar.vue';
 import ToDoItem from './components/ToDoItem.vue';
 import { useTodosStore } from './store/useTodosStore.ts';
 import { useFilters } from './store/useFilters.ts';
+import ColorsDialog from './components/ColorsDialog.vue';
 
 const store = useTodosStore();
 const { allTodos, isFetchingTodos } = storeToRefs(store);
@@ -50,11 +51,9 @@ const todos = computed(() => {
             <ToDoItem v-bind="item" :index="index" />
           </li>
         </ul>
+
+        <ColorsDialog />
       </section>
     </div>
   </section>
 </template>
-
-<style scoped>
-
-</style>./components/NewTodo.vue/index.ts

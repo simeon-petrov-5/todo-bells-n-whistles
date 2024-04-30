@@ -27,6 +27,13 @@ export const useTodosStore = defineStore('todos', () => {
     }
   };
 
+  const updateSingleColor = (idx: number, color: string | null) => {
+    const item = allTodos.value[idx];
+    if (item) {
+      item.color = color;
+    }
+  };
+
   const deleteSingle = (idx: number) => {
     allTodos.value.splice(idx, 1);
   };
@@ -49,5 +56,5 @@ export const useTodosStore = defineStore('todos', () => {
     allTodos.value.unshift(newItem);
   };
 
-  return { allTodos, isFetchingTodos, fetchTodos, markAll, deleteAll, updateSingleStatus, deleteSingle, createNew };
+  return { allTodos, isFetchingTodos, fetchTodos, markAll, deleteAll, updateSingleStatus, updateSingleColor, deleteSingle, createNew };
 });
